@@ -3,44 +3,22 @@ package main
 import (
 	"flag"
 	"log"
-	"os/exec"
 	"strings"
+
+	"github.com/op/go-libspotify/spotify"
 )
-
-// start of script tag
-const ScriptStart = "tell application \"Spotify\" to "
-
-var commands = map[string]string{
-	"state":      "player state",
-	"play":       "play",
-	"pause":      "pause",
-	"duration":   "duration of current track",
-	"name":       "name of current track",
-	"album":      "album of current track",
-	"id":         "id of current track",
-	"artwork":    "artwork of current track",
-	"vol_loud":   "set sound volume to 100",
-	"vol_soft":   "set sound volume to 20",
-	"vol_norm":   "set sound volume to 50",
-	"set_volume": "set sound volume to ", //requires parameter
-	"play_track": "play track ",          //requires parameter
-	"position":   "player position",
-}
 
 // API Host Flag
 var apiHost = flag.String("host", "localhost:8080",
 	"Hostname of Groupify API")
 
-func callSpotify(command string, param string) string {
-	fullcmd := ScriptStart + commands[command] + param
+// Spotify Username
+var username = flag.String("username", "",
+	"Spotify Username")
 
-	out, err := exec.Command("/usr/bin/osascript", "-e", fullcmd).Output()
-	if err != nil {
-		log.Fatal(err)
-		log.Fatal(out)
-	}
-	return strings.TrimSpace(string(out))
-}
+// Spotify Password
+var password = flag.String("password", "",
+	"Spotify Password")
 
 func main() {
 	log.Println("Starting Groupify Remote")
@@ -56,20 +34,44 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Create new portaudio writer
+	audio, err := newAudioWriter()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create Spotify Session
+	session := newSpotifySession(audio)
+
+	// Login to Spotify
+	credentials := spotify.Credentials{
+		Username: *username,
+		Password: *password,
+	}
+	if err = session.Login(credentials, false); err != nil {
+		log.Fatal(err)
+	}
+
+	// Get track
+	track := getTrackFromURI(session, "spotify:track:4yoirlyne2EwkftLG7CpvN")
+
+	track.Wait()
+	log.Println("Track Name:", track.Name())
+
 	// Spotify status queue
-	spotifyState := make(chan interface{})
-	go polling(spotifyState)
+	//spotifyState := make(chan interface{})
+	//go polling(spotifyState)
 
 	// Create notification message channel
 	notifications := make(chan interface{})
 	go WSMessageReceiver(c, notifications)
 
-	go processQueue(notifications)
+	//go processQueue(notifications)
 
-	for s := range spotifyState {
-		log.Println("Spotify State:", s)
-		SendWSMessage(c, s)
-	}
+	//for s := range spotifyState {
+	//log.Println("Spotify State:", s)
+	//SendWSMessage(c, s)
+	//}
 
 	done := make(chan bool, 1)
 	<-done
