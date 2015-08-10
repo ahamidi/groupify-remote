@@ -53,10 +53,18 @@ func main() {
 	}
 
 	// Get track
-	track := getTrackFromURI(session, "spotify:track:4yoirlyne2EwkftLG7CpvN")
+	track := getTrackFromURI(session, "spotify:track:5R0w7bVKJTeDltxIwkLpSZ")
 
 	track.Wait()
 	log.Println("Track Name:", track.Name())
+
+	player := session.Player()
+	if err := player.Load(track); err != nil {
+		log.Println("Error:", err)
+		log.Fatal(err)
+	}
+
+	player.Play()
 
 	// Spotify status queue
 	//spotifyState := make(chan interface{})

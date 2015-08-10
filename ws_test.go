@@ -14,7 +14,7 @@ func TestSendWSMessage(t *testing.T) {
 	// Send message
 	err = SendWSMessage(c, "hello there")
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestSendTrackEnd(t *testing.T) {
@@ -36,6 +36,6 @@ func TestSendTrackEnd(t *testing.T) {
 	// Send message
 	err = SendWSMessage(c, trackEnd)
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 }

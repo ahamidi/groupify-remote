@@ -34,7 +34,7 @@ func TestSpotifyPlayTrack(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	uri := "spotify:track:4yoirlyne2EwkftLG7CpvN"
+	uri := "spotify:track:5R0w7bVKJTeDltxIwkLpSZ"
 
 	link, err := session.ParseLink(uri)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestSpotifyPlayTrack(t *testing.T) {
 
 	player := session.Player()
 	if err := player.Load(track); err != nil {
-		fmt.Println("%#v", err)
+		fmt.Println("Error:", err)
 		log.Fatal(err)
 	}
 

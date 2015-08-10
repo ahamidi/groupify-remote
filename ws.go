@@ -44,7 +44,7 @@ func WSMessageReceiver(conn *websocket.Conn, notifications chan interface{}) {
 			log.Println("Error:", err)
 		}
 
-		// Unmarshal the message
+		// Process message
 		log.Println("Received Message:", string(msg[:msgLen]))
 		notifications <- msg[:msgLen]
 	}
